@@ -1,0 +1,35 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Rental extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'equipment_id',
+        'customer_name',
+        'customer_contact',
+        'start_date',
+        'end_date',
+        'price_total',
+        'price_per_day',
+        'status',
+        'notes',
+    ];
+
+    protected $casts = [
+        'price_total' => 'decimal:2',
+        'price_per_day' => 'decimal:2',
+        'start_date' => 'date',
+        'end_date' => 'date',
+    ];
+
+    public function equipment()
+    {
+        return $this->belongsTo(Equipment::class);
+    }
+}
