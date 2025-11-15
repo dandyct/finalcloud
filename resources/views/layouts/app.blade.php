@@ -36,7 +36,8 @@
                 <div class="d-flex align-items-center">
                     <a class="me-3 d-inline-flex align-items-center text-decoration-none" href="{{ route(Route::has('dashboard') ? 'dashboard' : 'equipments.index') }}">
                         <x-application-logo class="me-3" />
-                        <span class="h4 mb-0">{{ config('app.name', 'MiApp') }}</span>
+                        <!-- Marca fija "MEREY" en la navbar -->
+                        <span class="h4 mb-0">MEREY</span>
                     </a>
                     <div class="d-none d-md-block">
                         <a href="{{ route('equipments.index') }}" class="me-3 text-decoration-none">Equipos</a>

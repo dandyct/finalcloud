@@ -1,13 +1,18 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard')
+@section('title', 'Bienvenido')
 
 @section('content')
 <div class="container-fluid">
     <div class="row mb-4">
         <div class="col-12">
-            <h1 class="display-5">Dashboard</h1>
-            <p class="text-muted">Bienvenido al panel. Aquí puedes ver accesos rápidos a las secciones principales.</p>
+            @auth
+                <h1 class="display-5">Bienvenido, {{ auth()->user()->name }}</h1>
+                <p class="text-muted">¿Qué quieres revisar ahora?</p>
+            @else
+                <h1 class="display-5">Bienvenido</h1>
+                <p class="text-muted">Inicia sesión para acceder al panel y ver tus opciones.</p>
+            @endauth
         </div>
     </div>
 
