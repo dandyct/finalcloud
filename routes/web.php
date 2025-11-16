@@ -12,7 +12,7 @@ use App\Http\Controllers\ProfileController;
 */
 
 Route::get('/', function () {
-    return redirect()->route('equipments.index');
+    return redirect()->route('dashboard');
 });
 
 Route::resource('equipments', EquipmentController::class);

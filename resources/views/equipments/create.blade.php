@@ -46,6 +46,11 @@
         </div>
 
         <div class="mb-3">
+            <label class="form-label">Descripción</label>
+            <textarea name="description" class="form-control" rows="4">{{ old('description') }}</textarea>
+        </div>
+
+        <div class="mb-3">
             <label class="form-label">Imagen del equipo</label>
             <input type="file" name="image" class="form-control">
         </div>
