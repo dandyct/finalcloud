@@ -12,7 +12,7 @@
     </div>
     @endif
 
-    <form action="{{ route('equipments.store') }}" method="POST">
+    <form action="{{ route('equipments.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
 
         <div class="mb-3">
@@ -43,6 +43,11 @@
                 <option value="maintenance">Mantenimiento</option>
                 <option value="inactive">Inactivo</option>
             </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Imagen del equipo</label>
+            <input type="file" name="image" class="form-control">
         </div>
 
         <button class="btn btn-primary">Guardar</button>

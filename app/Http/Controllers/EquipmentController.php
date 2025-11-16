@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Equipment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class EquipmentController extends Controller
 {
@@ -28,7 +29,15 @@ class EquipmentController extends Controller
             'status' => 'required|in:available,rented,maintenance,inactive',
             'location' => 'nullable|string|max:255',
             'stock' => 'required|integer|min:0',
+
+            // 🟦 Validación de imagen
+            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
+
+        // 🟦 Guardar imagen si viene en el request
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('equipments', 'public');
+        }
 
         Equipment::create($data);
 
@@ -55,7 +64,19 @@ class EquipmentController extends Controller
             'status' => 'required|in:available,rented,maintenance,inactive',
             'location' => 'nullable|string|max:255',
             'stock' => 'required|integer|min:0',
+
+            // 🟦 Validación de imagen (opcional)
+            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
+
+        // 🟦 Si sube nueva imagen, eliminar la anterior
+        if ($request->hasFile('image')) {
+            if ($equipment->image && Storage::disk('public')->exists($equipment->image)) {
+                Storage::disk('public')->delete($equipment->image);
+            }
+
+            $data['image'] = $request->file('image')->store('equipments', 'public');
+        }
 
         $equipment->update($data);
 
@@ -64,7 +85,13 @@ class EquipmentController extends Controller
 
     public function destroy(Equipment $equipment)
     {
+        // 🟦 Borrar imagen cuando se elimina el registro
+        if ($equipment->image && Storage::disk('public')->exists($equipment->image)) {
+            Storage::disk('public')->delete($equipment->image);
+        }
+
         $equipment->delete();
+
         return redirect()->route('equipments.index')->with('success', 'Equipo eliminado correctamente.');
     }
 }
