@@ -4,14 +4,10 @@
 <div class="container">
     <h1>{{ $equipment->name }}</h1>
 
-    {{-- Imagen --}}
     @if ($equipment->image)
-        <div class="mb-3">
-            <img src="{{ asset('storage/' . $equipment->image) }}" 
-                 alt="Imagen de {{ $equipment->name }}" 
-                 class="img-fluid rounded" 
-                 style="max-width: 250px;">
-        </div>
+        <img src="{{ asset('storage/' . $equipment->image) }}"
+             alt="Imagen de {{ $equipment->name }}"
+             style="width:300px; height:auto; margin-bottom:20px; border-radius:8px;">
     @endif
 
     <p><strong>SKU:</strong> {{ $equipment->sku }}</p>
