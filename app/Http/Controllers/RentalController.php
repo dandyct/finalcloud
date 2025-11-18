@@ -17,7 +17,7 @@ class RentalController extends Controller
 
     public function index()
     {
-        $rentals = Rental::with('equipment')->orderBy('created_at', 'desc')->paginate(15);
+        $rentals = Rental::with('equipment')->orderBy('id', 'desc')->paginate(15);
         return view('rentals.index', compact('rentals'));
     }
 
@@ -88,7 +88,7 @@ class RentalController extends Controller
 
     public function edit(Rental $rental)
     {
-        $equipments = Equipment::orderBy('name')->get();
+        $equipments = Equipment::all();
         return view('rentals.edit', compact('rental', 'equipments'));
     }
 

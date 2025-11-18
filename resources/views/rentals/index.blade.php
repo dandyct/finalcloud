@@ -2,9 +2,9 @@
 
 @section('content')
 <div class="container">
-    <h1>Rentas</h1>
+    <h1 class="mb-4">Rentas</h1>
 
-    <a href="{{ route('rentals.create') }}" class="btn btn-primary mb-3">Nueva renta</a>
+    <a href="{{ route('rentals.create') }}" class="btn btn-primary mb-3">Nueva Renta</a>
 
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
@@ -13,37 +13,50 @@
     <table class="table table-striped">
         <thead>
             <tr>
+                <th>ID</th>
                 <th>Equipo</th>
                 <th>Cliente</th>
                 <th>Inicio</th>
                 <th>Fin</th>
-                <th>Precio total</th>
+                <th>Total</th>
                 <th>Estado</th>
                 <th>Acciones</th>
             </tr>
         </thead>
-        <tbody>
-            @forelse($rentals as $r)
-            <tr>
-                <td>{{ $r->equipment->name ?? '—' }}</td>
-                <td>{{ $r->customer_name }}</td>
-                <td>{{ optional($r->start_date)->format('Y-m-d') }}</td>
-                <td>{{ optional($r->end_date)->format('Y-m-d') }}</td>
-                <td>{{ number_format($r->price_total ?? 0, 2) }}</td>
-                <td>{{ ucfirst($r->status) }}</td>
-                <td>
-                    <a href="{{ route('rentals.show', $r) }}" class="btn btn-sm btn-info">Ver</a>
-                    <a href="{{ route('rentals.edit', $r) }}" class="btn btn-sm btn-secondary">Editar</a>
 
-                    <form action="{{ route('rentals.destroy', $r) }}" method="POST" style="display:inline-block" onsubmit="return confirm('Eliminar renta?')">
-                        @csrf
-                        @method('DELETE')
-                        <button class="btn btn-sm btn-danger">Eliminar</button>
-                    </form>
-                </td>
-            </tr>
+        <tbody>
+            @forelse($rentals as $rental)
+                <tr>
+                    <td>{{ $rental->id }}</td>
+                    <td>{{ $rental->equipment->name }}</td>
+                    <td>{{ $rental->customer_name }}</td>
+                    <td>{{ $rental->start_date }}</td>
+                    <td>{{ $rental->end_date ?? '—' }}</td>
+                    <td>${{ number_format($rental->total_price, 2) }}</td>
+                    <td>
+                        <span class="badge bg-{{ $rental->is_completed ? 'success' : 'warning' }}">
+                            {{ $rental->is_completed ? 'Completada' : 'Activa' }}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{{ route('rentals.show', $rental) }}" class="btn btn-sm btn-info">Ver</a>
+                        <a href="{{ route('rentals.edit', $rental) }}" class="btn btn-sm btn-warning">Editar</a>
+
+                        <form action="{{ route('rentals.destroy', $rental) }}"
+                              method="POST"
+                              class="d-inline"
+                              onsubmit="return confirm('¿Eliminar esta renta?');">
+                            @csrf
+                            @method('DELETE')
+                            <button class="btn btn-sm btn-danger">Eliminar</button>
+                        </form>
+
+                    </td>
+                </tr>
             @empty
-            <tr><td colspan="7">No hay rentas.</td></tr>
+                <tr>
+                    <td colspan="8" class="text-center">No hay rentas registradas</td>
+                </tr>
             @endforelse
         </tbody>
     </table>
