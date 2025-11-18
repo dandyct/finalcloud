@@ -9,7 +9,10 @@ class Rental extends Model
 {
     use HasFactory;
 
+    protected $table = 'rentals';
+
     protected $fillable = [
+        'user_id',
         'equipment_id',
         'customer_name',
         'customer_contact',
@@ -31,5 +34,10 @@ class Rental extends Model
     public function equipment()
     {
         return $this->belongsTo(Equipment::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }
