@@ -16,7 +16,9 @@ class RentalController extends Controller
 
     public function create()
     {
-        $equipments = Equipment::all();
+        // Solo equipos con stock disponible
+        $equipments = Equipment::where('stock', '>', 0)->get();
+
         return view('rentals.create', compact('equipments'));
     }
 
@@ -26,20 +28,53 @@ class RentalController extends Controller
             'equipment_id' => 'required|exists:equipments,id',
             'customer_name' => 'required|string',
             'start_date' => 'required|date',
-            'price_per_day' => 'nullable|numeric',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'notes' => 'nullable|string'
         ]);
 
-        $data = $request->all();
+        $equipment = Equipment::findOrFail($request->equipment_id);
 
-        // Calcula total si existe fecha fin
-        if ($request->end_date) {
-            $days = (strtotime($request->end_date) - strtotime($request->start_date)) / 86400;
-            $data['price_total'] = $days * $request->price_per_day;
+        // Evitar renta sin stock
+        if ($equipment->stock <= 0) {
+            return back()->withErrors(['equipment_id' => 'Este equipo no tiene stock disponible.']);
         }
 
-        Rental::create($data);
+        // Calcular precio por día automáticamente si no lo envían
+        $pricePerDay = $equipment->price_per_day;
 
-        return redirect()->route('rentals.index')->with('success', 'Renta creada correctamente.');
+        // Calcular total si existe fecha fin
+        $priceTotal = null;
+        if ($request->end_date) {
+            $days = (strtotime($request->end_date) - strtotime($request->start_date)) / 86400;
+            $days = max(1, $days);
+            $priceTotal = $days * $pricePerDay;
+        }
+
+        // Crear renta
+        $rental = Rental::create([
+            'equipment_id' => $equipment->id,
+            'customer_name' => $request->customer_name,
+            'customer_contact' => $request->customer_contact,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'notes' => $request->notes,
+            'price_total' => $priceTotal,
+            'status' => 'active'
+        ]);
+
+        // -----------------------------------------------------
+        // ACTUALIZAR EQUIPO
+        // -----------------------------------------------------
+        $equipment->stock -= 1;
+
+        if ($equipment->stock === 0) {
+            $equipment->status = 'rented';
+        }
+
+        $equipment->save();
+
+        return redirect()->route('rentals.index')
+            ->with('success', 'Renta creada correctamente.');
     }
 
     public function show(Rental $rental)
@@ -60,24 +95,78 @@ class RentalController extends Controller
             'equipment_id' => 'required|exists:equipments,id',
             'customer_name' => 'required|string',
             'start_date' => 'required|date',
-            'price_per_day' => 'nullable|numeric',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'is_completed' => 'nullable'
         ]);
 
-        $data = $request->all();
+        $oldEquipment = Equipment::find($rental->equipment_id);
+        $newEquipment = Equipment::find($request->equipment_id);
 
-        if ($request->end_date) {
-            $days = (strtotime($request->end_date) - strtotime($request->start_date)) / 86400;
-            $data['price_total'] = $days * $request->price_per_day;
+        // Reintegrar stock si se cambia de equipo en la renta
+        if ($request->equipment_id != $rental->equipment_id) {
+            $oldEquipment->stock += 1;
+            if ($oldEquipment->stock > 0) $oldEquipment->status = 'available';
+            $oldEquipment->save();
+
+            // Validar stock del nuevo equipo
+            if ($newEquipment->stock <= 0) {
+                return back()->withErrors(['equipment_id' => 'Este equipo no tiene stock disponible.']);
+            }
+
+            $newEquipment->stock -= 1;
+            if ($newEquipment->stock === 0) {
+                $newEquipment->status = 'rented';
+            }
+            $newEquipment->save();
         }
 
-        $rental->update($data);
+        // Actualizar precio total
+        $priceTotal = null;
+        if ($request->end_date) {
+            $days = (strtotime($request->end_date) - strtotime($request->start_date)) / 86400;
+            $days = max(1, $days);
+            $priceTotal = $days * $newEquipment->price_per_day;
+        }
 
-        return redirect()->route('rentals.index')->with('success', 'Renta actualizada.');
+        // Marcar como completada
+        $status = $request->has('is_completed') ? 'completed' : 'active';
+
+        $rental->update([
+            'equipment_id' => $request->equipment_id,
+            'customer_name' => $request->customer_name,
+            'customer_contact' => $request->customer_contact,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'notes' => $request->notes,
+            'price_total' => $priceTotal,
+            'status' => $status
+        ]);
+
+        // Si la renta se completó, regresar stock
+        if ($status === 'completed') {
+            $newEquipment->stock += 1;
+            $newEquipment->status = 'available';
+            $newEquipment->save();
+        }
+
+        return redirect()->route('rentals.index')
+            ->with('success', 'Renta actualizada correctamente.');
     }
 
     public function destroy(Rental $rental)
     {
+        // Regresar stock
+        $equipment = Equipment::find($rental->equipment_id);
+
+        if ($equipment) {
+            $equipment->stock += 1;
+            $equipment->status = 'available';
+            $equipment->save();
+        }
+
         $rental->delete();
-        return redirect()->route('rentals.index')->with('success', 'Renta eliminada.');
+
+        return redirect()->route('rentals.index')
+            ->with('success', 'Renta eliminada correctam    ente.');
     }
 }
