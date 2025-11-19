@@ -6,7 +6,6 @@
     <div class="card shadow-sm p-4">
         <h1 class="mb-4">{{ $equipment->name }}</h1>
 
-        {{-- Imagen del equipo --}}
         @if ($equipment->image)
             <div class="mb-4">
                 <img src="{{ asset('storage/' . $equipment->image) }}"
@@ -16,23 +15,35 @@
         @endif
 
         <ul class="list-group mb-4">
+
             <li class="list-group-item">
                 <strong>SKU:</strong> {{ $equipment->sku ?: 'N/A' }}
             </li>
+
             <li class="list-group-item">
                 <strong>Precio por día:</strong> ${{ number_format($equipment->price_per_day, 2) }}
             </li>
+
             <li class="list-group-item">
                 <strong>Stock:</strong> {{ $equipment->stock }}
             </li>
+
             <li class="list-group-item">
                 <strong>Estado:</strong> {{ ucfirst($equipment->status) }}
             </li>
+
             <li class="list-group-item">
                 <strong>Descripción:</strong><br>
                 {!! nl2br(e($equipment->description)) !!}
             </li>
+
         </ul>
+
+        {{-- 🔗 Enlace directo a las rentas de este equipo --}}
+        <a href="{{ route('rentals.index', ['equipment_id' => $equipment->id]) }}"
+           class="btn btn-warning mb-3">
+            Ver Rentas de este Equipo
+        </a>
 
         <div class="d-flex gap-2">
             <a href="{{ route('equipments.edit', $equipment->id) }}" class="btn btn-primary">
@@ -43,7 +54,7 @@
                 Volver
             </a>
         </div>
-    </div>
 
+    </div>
 </div>
 @endsection

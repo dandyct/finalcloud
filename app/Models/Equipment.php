@@ -28,6 +28,7 @@ class Equipment extends Model
 
     protected $casts = [
         'price_per_day' => 'decimal:2',
+        'stock' => 'integer',
     ];
 
     /*
@@ -36,31 +37,27 @@ class Equipment extends Model
     |--------------------------------------------------------------------------
     */
 
+    // Una máquina puede tener muchas rentas
     public function rentals()
     {
-        return $this->hasMany(Rental::class);
+        // IMPORTANTE:
+        // ->withTrashed() permite acceder a rentas aunque la máquina se elimine con soft delete
+        return $this->hasMany(Rental::class)->withTrashed();
     }
 
+    // Dueño del equipo
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-
     /*
     |--------------------------------------------------------------------------
-    | Helpers
+    | Accessors / Helpers
     |--------------------------------------------------------------------------
     */
 
-    // Verifica si el equipo pertenece al usuario autenticado
-    public function isOwnedBy($user)
-    {
-        if (!$user) return false;
-        return $this->user_id === $user->id;
-    }
-
-    // Retorna la URL de acceso a la imagen (si usas storage/public)
+    // Imagen accesible públicamente
     public function getImageUrlAttribute()
     {
         if (!$this->image) {
@@ -68,5 +65,17 @@ class Equipment extends Model
         }
 
         return asset('storage/' . $this->image);
+    }
+
+    // Verificar si el dueño es el usuario autenticado
+    public function isOwnedBy($user)
+    {
+        return $user && $this->user_id === $user->id;
+    }
+
+    // Verifica si hay stock disponible
+    public function hasStock()
+    {
+        return $this->stock > 0;
     }
 }

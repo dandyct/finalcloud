@@ -3,77 +3,141 @@
 @section('content')
 <div class="container">
 
-    <h1 class="mb-4">Equipos</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="m-0">Equipos</h1>
+        <a href="{{ route('equipments.create') }}" class="btn btn-primary">
+            + Nuevo Equipo
+        </a>
+    </div>
 
-    <a href="{{ route('equipments.create') }}" class="btn btn-primary mb-3">
-        Nuevo Equipo
-    </a>
+    {{-- Filtro por estado --}}
+    <form method="GET" class="mb-3">
+        <div class="row g-2">
+            <div class="col-md-4">
+                <select name="status" class="form-select" onchange="this.form.submit()">
+                    <option value="">-- Filtrar por estado --</option>
+                    <option value="available"   {{ request('status')=='available' ? 'selected' : '' }}>Disponible</option>
+                    <option value="rented"      {{ request('status')=='rented' ? 'selected' : '' }}>En renta</option>
+                    <option value="maintenance" {{ request('status')=='maintenance' ? 'selected' : '' }}>Mantenimiento</option>
+                    <option value="inactive"    {{ request('status')=='inactive' ? 'selected' : '' }}>Inactivo</option>
+                </select>
+            </div>
+        </div>
+    </form>
 
-    @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
+    {{-- Tabla de equipos --}}
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
 
-    <table class="table table-bordered table-striped">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Imagen</th>
-                <th>Nombre</th>
-                <th>Stock</th>
-                <th>Precio por día</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
+            <table class="table mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Imagen</th>
+                        <th>Nombre</th>
+                        <th>SKU</th>
+                        <th>Precio Día</th>
+                        <th>Stock</th>
+                        <th>Estado</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
 
-        <tbody>
-            @foreach($equipments as $equipment)
-            <tr>
-                <td>{{ $equipment->id }}</td>
+                <tbody>
+                    @forelse ($equipments as $equipment)
+                    <tr>
+                        {{-- Imagen --}}
+                        <td style="width: 110px;">
+                            @if($equipment->image)
+                                <img src="{{ asset('storage/' . $equipment->image) }}"
+                                     style="width:80px; height:80px; object-fit:cover; border-radius:8px;">
+                            @else
+                                <span class="text-muted">Sin imagen</span>
+                            @endif
+                        </td>
 
-                <td>
-                    @if($equipment->image)
-                        <img src="{{ asset('storage/' . $equipment->image) }}" 
-                             width="80" height="80" style="object-fit: cover;">
-                    @else
-                        <small>Sin imagen</small>
-                    @endif
-                </td>
+                        {{-- Nombre --}}
+                        <td>{{ $equipment->name }}</td>
 
-                <td>{{ $equipment->name }}</td>
-                <td>{{ $equipment->stock }}</td>
-                <td>${{ number_format($equipment->price_per_day, 2) }}</td>
+                        {{-- SKU --}}
+                        <td>{{ $equipment->sku ?: 'N/A' }}</td>
 
-                <td>
-                    <!-- BOTÓN RENTAR (PASO 5) -->
-                    <a href="{{ route('rentals.create', ['equipment_id' => $equipment->id]) }}" 
-                       class="btn btn-sm btn-success mb-1">
-                        Rentar
-                    </a>
+                        {{-- Precio --}}
+                        <td>${{ number_format($equipment->price_per_day, 2) }}</td>
 
-                    <a href="{{ route('equipments.show', $equipment->id) }}" 
-                       class="btn btn-sm btn-info mb-1">
-                        Ver
-                    </a>
+                        {{-- Stock --}}
+                        <td>{{ $equipment->stock }}</td>
 
-                    <a href="{{ route('equipments.edit', $equipment->id) }}" 
-                       class="btn btn-sm btn-warning mb-1">
-                        Editar
-                    </a>
+                        {{-- Estado --}}
+                        <td>
+                            @php
+                                $colors = [
+                                    'available'   => 'success',
+                                    'rented'      => 'warning',
+                                    'maintenance' => 'info',
+                                    'inactive'    => 'secondary'
+                                ];
+                            @endphp
+                            <span class="badge bg-{{ $colors[$equipment->status] ?? 'secondary' }}">
+                                {{ ucfirst($equipment->status) }}
+                            </span>
+                        </td>
 
-                    <form action="{{ route('equipments.destroy', $equipment->id) }}" 
-                          method="POST" 
-                          class="d-inline">
-                        @csrf
-                        @method('DELETE')
-                        <button class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar equipo?')">
-                            Eliminar
-                        </button>
-                    </form>
-                </td>
-            </tr>
-            @endforeach
-        </tbody>
+                        {{-- Acciones --}}
+                        <td class="text-center">
 
-    </table>
+                            <div class="d-flex justify-content-center gap-2">
+
+                                {{-- Ver --}}
+                                <a href="{{ route('equipments.show', $equipment->id) }}"
+                                   class="btn btn-sm btn-outline-primary">
+                                    Ver
+                                </a>
+
+                                {{-- Editar --}}
+                                <a href="{{ route('equipments.edit', $equipment->id) }}"
+                                   class="btn btn-sm btn-outline-warning">
+                                    Editar
+                                </a>
+
+                                {{-- Rentas asociadas --}}
+                                <a href="{{ route('rentals.index', ['equipment_id' => $equipment->id]) }}"
+                                   class="btn btn-sm btn-outline-success">
+                                    Rentas
+                                </a>
+
+                                {{-- Eliminar --}}
+                                <form action="{{ route('equipments.destroy', $equipment->id) }}"
+                                      method="POST"
+                                      onsubmit="return confirm('¿Seguro que deseas eliminar este equipo?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="btn btn-sm btn-outline-danger">
+                                        Borrar
+                                    </button>
+                                </form>
+
+                            </div>
+
+                        </td>
+                    </tr>
+                    @empty
+
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">
+                            No hay equipos registrados.
+                        </td>
+                    </tr>
+
+                    @endforelse
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+    <div class="mt-3">
+        {{ $equipments->links() }}
+    </div>
+
 </div>
 @endsection

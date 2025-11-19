@@ -7,7 +7,6 @@
 
     <h2 class="mb-4">Registrar nuevo equipo</h2>
 
-    {{-- Mostrar errores --}}
     @if($errors->any())
     <div class="alert alert-danger">
         <ul class="mb-0">
@@ -27,49 +26,27 @@
                 {{-- Nombre --}}
                 <div class="mb-3">
                     <label class="form-label">Nombre *</label>
-                    <input 
-                        type="text" 
-                        name="name" 
-                        class="form-control" 
-                        value="{{ old('name') }}" 
-                        required
-                    >
+                    <input type="text" name="name" class="form-control" value="{{ old('name') }}" required>
                 </div>
 
                 {{-- SKU --}}
                 <div class="mb-3">
                     <label class="form-label">SKU</label>
-                    <input 
-                        type="text" 
-                        name="sku" 
-                        class="form-control" 
-                        value="{{ old('sku') }}"
-                    >
+                    <input type="text" name="sku" class="form-control" value="{{ old('sku') }}">
                 </div>
 
                 {{-- Precio --}}
                 <div class="mb-3">
                     <label class="form-label">Precio por día *</label>
-                    <input 
-                        type="number" 
-                        step="0.01" 
-                        name="price_per_day" 
-                        class="form-control" 
-                        value="{{ old('price_per_day', 0) }}" 
-                        required
-                    >
+                    <input type="number" step="0.01" name="price_per_day" class="form-control"
+                           value="{{ old('price_per_day', 0) }}" required>
                 </div>
 
                 {{-- Stock --}}
                 <div class="mb-3">
                     <label class="form-label">Stock *</label>
-                    <input 
-                        type="number" 
-                        name="stock" 
-                        class="form-control" 
-                        value="{{ old('stock', 1) }}" 
-                        required
-                    >
+                    <input type="number" name="stock" class="form-control"
+                           value="{{ old('stock', 1) }}" required>
                 </div>
 
                 {{-- Estado --}}
@@ -86,31 +63,21 @@
                 {{-- Descripción --}}
                 <div class="mb-3">
                     <label class="form-label">Descripción</label>
-                    <textarea 
-                        name="description" 
-                        class="form-control" 
-                        rows="4"
-                    >{{ old('description') }}</textarea>
+                    <textarea name="description" class="form-control" rows="4">{{ old('description') }}</textarea>
                 </div>
 
                 {{-- Imagen --}}
                 <div class="mb-3">
                     <label class="form-label">Imagen del equipo</label>
-                    <input 
-                        type="file" 
-                        name="image" 
-                        class="form-control"
-                    >
+                    <input type="file" name="image" class="form-control">
                 </div>
 
-                {{-- Botones --}}
                 <div class="d-flex gap-2">
                     <button class="btn btn-primary">Guardar</button>
                     <a href="{{ route('equipments.index') }}" class="btn btn-secondary">Cancelar</a>
                 </div>
 
             </form>
-
         </div>
     </div>
 

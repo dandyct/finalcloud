@@ -20,8 +20,8 @@
 
         {{-- EQUIPO --}}
         <div class="mb-3">
-            <label class="form-label">Equipo</label>
-            <select name="equipment_id" class="form-control" required>
+            <label class="form-label fw-bold">Equipo</label>
+            <select name="equipment_id" class="form-select" required>
                 <option value="">-- Selecciona equipo --</option>
 
                 @foreach($equipments as $eq)
@@ -29,9 +29,9 @@
                         value="{{ $eq->id }}"
                         @if( old('equipment_id', request('equipment_id')) == $eq->id ) selected @endif
                     >
-                        {{ $eq->name }} —
-                        ${{ number_format($eq->price_per_day, 2) }}/día —
-                        {{ $eq->stock }} disponibles
+                        {{ $eq->name }} — 
+                        ${{ number_format($eq->price_per_day, 2) }}/día — 
+                        Stock: {{ $eq->stock }}
                     </option>
                 @endforeach
             </select>
@@ -39,52 +39,61 @@
 
         {{-- CLIENTE --}}
         <div class="mb-3">
-            <label class="form-label">Nombre del cliente</label>
+            <label class="form-label fw-bold">Nombre del cliente</label>
             <input 
                 type="text" 
                 name="customer_name" 
                 class="form-control" 
                 value="{{ old('customer_name') }}" 
+                placeholder="Ej. Juan Pérez"
                 required
             >
         </div>
 
         <div class="mb-3">
-            <label class="form-label">Contacto</label>
+            <label class="form-label fw-bold">Contacto</label>
             <input 
                 type="text" 
                 name="customer_contact" 
                 class="form-control" 
                 value="{{ old('customer_contact') }}"
+                placeholder="Teléfono o email"
             >
         </div>
 
         {{-- FECHAS --}}
-        <div class="mb-3">
-            <label class="form-label">Inicio</label>
-            <input 
-                type="date" 
-                name="start_date" 
-                class="form-control" 
-                value="{{ old('start_date', now()->toDateString()) }}" 
-                required
-            >
-        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Inicio</label>
+                <input 
+                    type="date" 
+                    name="start_date" 
+                    class="form-control" 
+                    value="{{ old('start_date', now()->toDateString()) }}" 
+                    required
+                >
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">Fin (opcional)</label>
-            <input 
-                type="date" 
-                name="end_date" 
-                class="form-control" 
-                value="{{ old('end_date') }}"
-            >
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Fin (opcional)</label>
+                <input 
+                    type="date" 
+                    name="end_date" 
+                    class="form-control" 
+                    value="{{ old('end_date') }}"
+                >
+            </div>
         </div>
 
         {{-- NOTAS --}}
         <div class="mb-3">
-            <label class="form-label">Notas</label>
-            <textarea name="notes" class="form-control">{{ old('notes') }}</textarea>
+            <label class="form-label fw-bold">Notas</label>
+            <textarea 
+                name="notes" 
+                class="form-control" 
+                rows="3"
+                placeholder="Comentarios adicionales..."
+            >{{ old('notes') }}</textarea>
         </div>
 
         <button class="btn btn-primary">Guardar</button>

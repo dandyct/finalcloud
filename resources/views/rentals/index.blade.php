@@ -2,16 +2,19 @@
 
 @section('content')
 <div class="container">
+
     <h1 class="mb-4">Rentas</h1>
 
-    <a href="{{ route('rentals.create') }}" class="btn btn-primary mb-3">Nueva Renta</a>
+    <a href="{{ route('rentals.create') }}" class="btn btn-primary mb-3">
+        Nueva Renta
+    </a>
 
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
-    <table class="table table-striped">
-        <thead>
+    <table class="table table-striped table-bordered align-middle">
+        <thead class="table-dark">
             <tr>
                 <th>ID</th>
                 <th>Equipo</th>
@@ -26,41 +29,71 @@
 
         <tbody>
             @forelse($rentals as $rental)
-                <tr>
-                    <td>{{ $rental->id }}</td>
-                    <td>{{ $rental->equipment->name }}</td>
-                    <td>{{ $rental->customer_name }}</td>
-                    <td>{{ $rental->start_date }}</td>
-                    <td>{{ $rental->end_date ?? '—' }}</td>
-                    <td>${{ number_format($rental->total_price, 2) }}</td>
-                    <td>
-                        <span class="badge bg-{{ $rental->is_completed ? 'success' : 'warning' }}">
-                            {{ $rental->is_completed ? 'Completada' : 'Activa' }}
-                        </span>
-                    </td>
-                    <td>
-                        <a href="{{ route('rentals.show', $rental) }}" class="btn btn-sm btn-info">Ver</a>
-                        <a href="{{ route('rentals.edit', $rental) }}" class="btn btn-sm btn-warning">Editar</a>
+            <tr>
+                <td>{{ $rental->id }}</td>
 
-                        <form action="{{ route('rentals.destroy', $rental) }}"
-                              method="POST"
-                              class="d-inline"
-                              onsubmit="return confirm('¿Eliminar esta renta?');">
-                            @csrf
-                            @method('DELETE')
-                            <button class="btn btn-sm btn-danger">Eliminar</button>
-                        </form>
+                {{-- 🔥 Maneja automáticamente rentas sin equipo para evitar que truene --}}
+                <td>
+                    @if($rental->equipment)
+                        {{ $rental->equipment->name }}
+                    @else
+                        <span class="text-danger">Sin equipo</span>
+                    @endif
+                </td>
 
-                    </td>
-                </tr>
+                <td>{{ $rental->customer_name ?? 'N/A' }}</td>
+                <td>{{ $rental->start_date }}</td>
+                <td>{{ $rental->end_date ?? '—' }}</td>
+
+                <td>${{ number_format($rental->price_total, 2) }}</td>
+
+                <td>
+                    <span class="badge 
+                        @if($rental->status === 'completed') bg-success
+                        @elseif($rental->status === 'active') bg-warning
+                        @else bg-secondary
+                        @endif
+                    ">
+                        {{ ucfirst($rental->status) }}
+                    </span>
+                </td>
+
+                <td>
+                    <a href="{{ route('rentals.show', $rental) }}" 
+                       class="btn btn-sm btn-info mb-1">
+                        Ver
+                    </a>
+
+                    <a href="{{ route('rentals.edit', $rental) }}" 
+                       class="btn btn-sm btn-warning mb-1">
+                        Editar
+                    </a>
+
+                    <form 
+                        action="{{ route('rentals.destroy', $rental) }}" 
+                        method="POST" 
+                        class="d-inline"
+                        onsubmit="return confirm('¿Eliminar esta renta?');">
+                        @csrf
+                        @method('DELETE')
+                        <button class="btn btn-sm btn-danger">
+                            Eliminar
+                        </button>
+                    </form>
+                </td>
+            </tr>
             @empty
-                <tr>
-                    <td colspan="8" class="text-center">No hay rentas registradas</td>
-                </tr>
+            <tr>
+                <td colspan="8" class="text-center">No hay rentas registradas</td>
+            </tr>
             @endforelse
         </tbody>
     </table>
 
-    {{ $rentals->links() }}
+    {{-- Paginación --}}
+    <div class="mt-3">
+        {{ $rentals->links() }}
+    </div>
+
 </div>
 @endsection
